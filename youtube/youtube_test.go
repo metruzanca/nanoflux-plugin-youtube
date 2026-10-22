@@ -37,6 +37,9 @@ func TestMatch(t *testing.T) {
 		{"https://youtube.com/feeds/videos.xml?channel_id=UC5--wS0Ljbin1TjWQX6eafA", pluginapi.CapURLPolicy, true},
 		{"https://www.youtube.com/@SomeChannel", pluginapi.CapURLPolicy, true},
 		{"https://example.com/x", pluginapi.CapURLPolicy, false},
+		{"https://www.youtube.com/@SomeChannel", pluginapi.CapIcon, true},
+		{"https://youtu.be/H0KAi8AWsnM", pluginapi.CapIcon, true},
+		{"https://example.com/x", pluginapi.CapIcon, false},
 		// Item-link capabilities match any video link, from any host.
 		{"https://www.youtube.com/watch?v=H0KAi8AWsnM", pluginapi.CapRender, true},
 		{"https://youtu.be/H0KAi8AWsnM", pluginapi.CapDecorate, true},

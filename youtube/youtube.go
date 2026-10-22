@@ -1,5 +1,5 @@
-// Package youtube is the reference native plugin. It implements
-// pluginapi.Fetcher for YouTube channels: discovery resolves a channel id from
+// Package youtube is the YouTube plugin. It implements pluginapi.Fetcher for
+// YouTube channels: discovery resolves a channel id from
 // any channel URL form, and fetch reads the channel's recent videos through the
 // site's internal browse API.
 //
@@ -45,11 +45,19 @@ const (
 type Plugin struct{}
 
 var (
-	_ pluginapi.Fetcher    = Plugin{}
-	_ pluginapi.Renderer   = Plugin{}
-	_ pluginapi.Decoration = Plugin{}
-	_ pluginapi.URLPolicy  = Plugin{}
+	_ pluginapi.Fetcher      = Plugin{}
+	_ pluginapi.Renderer     = Plugin{}
+	_ pluginapi.Decoration   = Plugin{}
+	_ pluginapi.URLPolicy    = Plugin{}
+	_ pluginapi.IconProvider = Plugin{}
 )
+
+// Icon returns the built-in YouTube icon for a YouTube host.
+func (Plugin) Icon(string) (string, []byte) {
+	return "image/svg+xml", []byte(youtubeIcon)
+}
+
+const youtubeIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="#9aa3b2"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>`
 
 func (Plugin) Meta() pluginapi.Meta {
 	return pluginapi.Meta{
@@ -70,7 +78,7 @@ func (Plugin) Docs() string { return readme }
 func (Plugin) Match(u *url.URL, cap pluginapi.Capability) bool {
 	if isYouTubeHost(u.Hostname()) {
 		switch cap {
-		case pluginapi.CapDiscover, pluginapi.CapURLPolicy:
+		case pluginapi.CapDiscover, pluginapi.CapURLPolicy, pluginapi.CapIcon:
 			return true
 		case pluginapi.CapFetch:
 			return isChannelFeedURL(u)
