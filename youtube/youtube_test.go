@@ -132,6 +132,18 @@ func browseLockup(id, title, badge, views, ago string) map[string]any {
 	}
 }
 
+// membersOnlyLockup adds YouTube's members-only metadata badge to a lockup.
+func membersOnlyLockup(lv map[string]any) map[string]any {
+	md, _ := lv["metadata"].(map[string]any)["lockupMetadataViewModel"].(map[string]any)["metadata"].(map[string]any)["contentMetadataViewModel"].(map[string]any)
+	md["metadataRows"] = append(md["metadataRows"].([]any), map[string]any{
+		"badges": []any{map[string]any{"badgeViewModel": map[string]any{
+			"badgeText":  "Members only",
+			"badgeStyle": "BADGE_MEMBERS_ONLY",
+		}}},
+	})
+	return lv
+}
+
 func browseHost(t *testing.T, lockups ...map[string]any) hostFunc {
 	t.Helper()
 	body, err := json.Marshal(map[string]any{
@@ -181,6 +193,37 @@ func TestFetchCarriesDuration(t *testing.T) {
 	}
 	if got := res.Items[0].DurationSec; got != 5*60+41 {
 		t.Fatalf("duration = %d, want %d (5:41)", got, 5*60+41)
+	}
+}
+
+func TestFetchMarksMembersOnly(t *testing.T) {
+	h := browseHost(t,
+		membersOnlyLockup(browseLockup("mem", "Members Video", "9:13", "", "4 days ago")),
+		browseLockup("pub", "Public Video", "5:41", "1M views", "3 days ago"),
+	)
+	res, err := Plugin{}.Fetch(context.Background(), pluginapi.FetchRequest{
+		URL: "https://www.youtube.com/feeds/videos.xml?channel_id=UCx",
+	}, h)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(res.Items) != 2 {
+		t.Fatalf("items = %+v", res.Items)
+	}
+	if got := res.Items[0].Categories; len(got) != 1 || got[0] != categoryMembersOnly {
+		t.Fatalf("members-only categories = %v, want [%s]", got, categoryMembersOnly)
+	}
+	if got := res.Items[1].Categories; len(got) != 0 {
+		t.Fatalf("public video categories = %v, want none", got)
+	}
+}
+
+func TestLockupMembersOnly(t *testing.T) {
+	if !lockupMembersOnly(membersOnlyLockup(browseLockup("mem", "Members Video", "9:13", "", "4 days ago"))) {
+		t.Fatal("members-only badge not detected")
+	}
+	if lockupMembersOnly(browseLockup("pub", "Public Video", "5:41", "1M views", "3 days ago")) {
+		t.Fatal("normal lockup should not be members-only")
 	}
 }
 

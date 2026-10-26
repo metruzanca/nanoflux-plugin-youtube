@@ -14,3 +14,8 @@ Implementation invariants for maintainers. The user-facing documentation is
   environment plumbing.
 - `Match` must honour the capability it is asked about. It claims `CapIcon` on
   YouTube hosts and returns the bundled SVG from `Icon`.
+- Members-only videos are detected from the browse lockup's metadata badge
+  (`badgeViewModel.badgeStyle == "BADGE_MEMBERS_ONLY"`, label "Members only")
+  and tagged with the `members-only` category (`lockupMembersOnly`). The badge
+  is absent on a normal video; do not infer it from the title or description.
+  The host's tag filter uses the category to show or hide these posts.

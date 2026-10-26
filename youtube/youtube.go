@@ -29,6 +29,10 @@ import (
 // Name is the plugin's stable identifier (stored in feeds.plugin_name).
 const Name = "youtube"
 
+// categoryMembersOnly labels a members-only video so the host can show or hide
+// members-only posts with one tag filter rule.
+const categoryMembersOnly = "members-only"
+
 // readme is the plugin's Markdown documentation, shown from the admin plugin
 // card and from a feed's edit page.
 //
@@ -434,7 +438,46 @@ func lockupItem(lv map[string]any) (pluginapi.Item, bool) {
 	if t := parseRelativeTime(relativePart(metadataParts(lv))); !t.IsZero() {
 		it.PublishedAt = dbTime(t)
 	}
+	if lockupMembersOnly(lv) {
+		it.Categories = append(it.Categories, categoryMembersOnly)
+	}
 	return it, true
+}
+
+// lockupMembersOnly reports whether a browse lockup carries YouTube's
+// members-only badge. Browse renders it in a metadata row as a badgeViewModel
+// with badgeStyle BADGE_MEMBERS_ONLY (badgeText "Members only"); the badge is
+// absent on a normal video. Matching the style is the durable signal, with the
+// label as a fallback for a renderer that drops the style.
+func lockupMembersOnly(lv map[string]any) bool {
+	found := false
+	var walk func(v any)
+	walk = func(v any) {
+		if found {
+			return
+		}
+		switch t := v.(type) {
+		case map[string]any:
+			if badge, ok := t["badgeViewModel"].(map[string]any); ok {
+				style, _ := badge["badgeStyle"].(string)
+				text, _ := badge["badgeText"].(string)
+				if strings.Contains(strings.ToUpper(style), "MEMBERS_ONLY") ||
+					strings.EqualFold(strings.TrimSpace(text), "Members only") {
+					found = true
+					return
+				}
+			}
+			for _, c := range t {
+				walk(c)
+			}
+		case []any:
+			for _, c := range t {
+				walk(c)
+			}
+		}
+	}
+	walk(lv)
+	return found
 }
 
 // lockupDuration finds a video's runtime from the lockup's thumbnail-overlay

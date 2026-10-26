@@ -21,4 +21,7 @@ than the channel RSS. The RSS carries no video duration; browse returns duration
 ## Filtering
 
 Items carry the video title and description, so the `title` and `summary` filter
-fields work as usual. There are no site-specific categories.
+fields work as usual. A members-only video carries the `members-only` category,
+so a single tag filter row can show or hide members-only posts.
+
+Other than that, items carry no site-specific categories.
