@@ -17,6 +17,10 @@ than the channel RSS. The RSS carries no video duration; browse returns duration
 - Channel feeds are stored on `www.youtube.com`. YouTube answers its internal
   browse endpoint only on that host (a request to the bare `youtube.com` returns
   HTTP 400), so the plugin owns the feed URL shape and rewrites the bare host.
+- **Videos resume where you left off.** A video watched partway is remembered
+  per account on the server, so opening it again (from any device or login)
+  starts at the saved position instead of the beginning, with no prompt. A
+  finished video starts over; use the player's own scrubber to restart sooner.
 
 ## Filtering
 

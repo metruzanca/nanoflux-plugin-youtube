@@ -79,6 +79,29 @@ func TestRenderVideoLinks(t *testing.T) {
 	}
 }
 
+func TestPlaybackFor(t *testing.T) {
+	p := Plugin{}
+	cases := []struct{ link, key string }{
+		{"https://www.youtube.com/watch?v=H0KAi8AWsnM", "H0KAi8AWsnM"},
+		{"https://youtu.be/H0KAi8AWsnM", "H0KAi8AWsnM"},
+		{"https://www.youtube.com/shorts/H0KAi8AWsnM", "H0KAi8AWsnM"},
+		{"https://example.com/post/1", ""},
+		{"https://youtube.com/watch", ""},
+	}
+	for _, c := range cases {
+		got := p.PlaybackFor(c.link)
+		if got.Key != c.key {
+			t.Errorf("PlaybackFor(%q).Key = %q, want %q", c.link, got.Key, c.key)
+		}
+		if c.key == "" && got.Player != "" {
+			t.Errorf("PlaybackFor(%q).Player = %q, want empty", c.link, got.Player)
+		}
+		if c.key != "" && got.Player != "youtube" {
+			t.Errorf("PlaybackFor(%q).Player = %q, want youtube", c.link, got.Player)
+		}
+	}
+}
+
 func TestDecorateVideoLinks(t *testing.T) {
 	p := Plugin{}
 	decs, err := p.Decorate(context.Background(), pluginapi.DecorateRequest{Items: []pluginapi.Item{

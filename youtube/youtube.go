@@ -49,11 +49,12 @@ const (
 type Plugin struct{}
 
 var (
-	_ pluginapi.Fetcher      = Plugin{}
-	_ pluginapi.Renderer     = Plugin{}
-	_ pluginapi.Decoration   = Plugin{}
-	_ pluginapi.URLPolicy    = Plugin{}
-	_ pluginapi.IconProvider = Plugin{}
+	_ pluginapi.Fetcher          = Plugin{}
+	_ pluginapi.Renderer         = Plugin{}
+	_ pluginapi.PlaybackProvider = Plugin{}
+	_ pluginapi.Decoration       = Plugin{}
+	_ pluginapi.URLPolicy        = Plugin{}
+	_ pluginapi.IconProvider     = Plugin{}
 )
 
 // Icon returns the built-in YouTube icon for a YouTube host.
@@ -89,7 +90,7 @@ func (Plugin) Match(u *url.URL, cap pluginapi.Capability) bool {
 		}
 	}
 	switch cap {
-	case pluginapi.CapRender, pluginapi.CapDecorate:
+	case pluginapi.CapRender, pluginapi.CapDecorate, pluginapi.CapPlayback:
 		return videoID(u) != ""
 	default:
 		return false
@@ -116,6 +117,21 @@ func (Plugin) Render(_ context.Context, req pluginapi.RenderRequest, _ pluginapi
 		return pluginapi.Media{}, nil
 	}
 	return pluginapi.Media{EmbedSrc: "https://www.youtube.com/embed/" + id}, nil
+}
+
+// PlaybackFor makes a YouTube video resumable: the video id is the media
+// identity shared by every item that links it, and "youtube" selects the core
+// player adapter that can seek and report the position.
+func (Plugin) PlaybackFor(link string) pluginapi.PlaybackInfo {
+	u, err := url.Parse(link)
+	if err != nil {
+		return pluginapi.PlaybackInfo{}
+	}
+	id := videoID(u)
+	if id == "" {
+		return pluginapi.PlaybackInfo{}
+	}
+	return pluginapi.PlaybackInfo{Key: id, Player: "youtube"}
 }
 
 // Decorate classifies a YouTube video link as a video card and supplies its

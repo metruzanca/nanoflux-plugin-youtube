@@ -19,3 +19,7 @@ Implementation invariants for maintainers. The user-facing documentation is
   and tagged with the `members-only` category (`lockupMembersOnly`). The badge
   is absent on a normal video; do not infer it from the title or description.
   The host's tag filter uses the category to show or hide these posts.
+- `PlaybackFor` claims `CapPlayback` for video links (watch, youtu.be, shorts,
+  live, embed) and returns the video id as the media key plus the host's
+  `youtube` player adapter, so a partially watched video resumes from any device.
+  It is pure and matched on the item link; keep it that way.
