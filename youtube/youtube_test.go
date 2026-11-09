@@ -34,6 +34,12 @@ func TestMatch(t *testing.T) {
 		{"https://example.com/x", pluginapi.CapDiscover, false},
 		{"https://www.youtube.com/feeds/videos.xml?channel_id=UC5--wS0Ljbin1TjWQX6eafA", pluginapi.CapFetch, true},
 		{"https://www.youtube.com/@SomeChannel", pluginapi.CapFetch, false},
+		// Thumbnails are cached for channel feeds (their browse URLs expire);
+		// page and video URLs never force caching.
+		{"https://www.youtube.com/feeds/videos.xml?channel_id=UC5--wS0Ljbin1TjWQX6eafA", pluginapi.CapImageCache, true},
+		{"https://youtube.com/feeds/videos.xml?channel_id=UC5--wS0Ljbin1TjWQX6eafA", pluginapi.CapImageCache, true},
+		{"https://www.youtube.com/@SomeChannel", pluginapi.CapImageCache, false},
+		{"https://www.youtube.com/watch?v=H0KAi8AWsnM", pluginapi.CapImageCache, false},
 		{"https://youtube.com/feeds/videos.xml?channel_id=UC5--wS0Ljbin1TjWQX6eafA", pluginapi.CapURLPolicy, true},
 		{"https://www.youtube.com/@SomeChannel", pluginapi.CapURLPolicy, true},
 		{"https://example.com/x", pluginapi.CapURLPolicy, false},

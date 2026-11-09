@@ -77,15 +77,17 @@ func (Plugin) Docs() string { return readme }
 
 // Match handles discovery on any YouTube host, fetch for the channel RSS URL
 // (whose 404 fallback requires the plugin to own the fetch), the channel feed
-// URL rules (so a stored feed keeps the www host YouTube answers), and the
-// item-link capabilities: a YouTube video link renders as an embeddable player
-// (CapRender) and is classified as a video card (CapDecorate), from any feed.
+// URL rules (so a stored feed keeps the www host YouTube answers), host-side
+// image caching for a channel feed (CapImageCache: browse serves thumbnails
+// with short-lived signed URLs), and the item-link capabilities: a YouTube video
+// link renders as an embeddable player (CapRender) and is classified as a video
+// card (CapDecorate), from any feed.
 func (Plugin) Match(u *url.URL, cap pluginapi.Capability) bool {
 	if isYouTubeHost(u.Hostname()) {
 		switch cap {
 		case pluginapi.CapDiscover, pluginapi.CapURLPolicy, pluginapi.CapIcon:
 			return true
-		case pluginapi.CapFetch:
+		case pluginapi.CapFetch, pluginapi.CapImageCache:
 			return isChannelFeedURL(u)
 		}
 	}

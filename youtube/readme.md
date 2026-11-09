@@ -12,6 +12,10 @@ than the channel RSS. The RSS carries no video duration; browse returns duration
 - **Publish time is made absolute at fetch time.** Browse reports it only as
   relative text ("3 days ago"), which is converted to a real timestamp when the
   feed is polled, so a stored item never shows a frozen "3 days ago".
+- **Thumbnails are cached at poll time.** Browse serves thumbnail URLs that stop
+  working after a short while, so each video's image is downloaded into
+  nanoflux's own storage when the feed is fetched. A video whose creator later
+  changes its thumbnail keeps the cached image; it is not re-downloaded.
 - Any channel URL form is resolved to its channel id, so the feed keeps working
   regardless of how the channel was linked.
 - Channel feeds are stored on `www.youtube.com`. YouTube answers its internal

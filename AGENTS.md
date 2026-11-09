@@ -14,6 +14,13 @@ Implementation invariants for maintainers. The user-facing documentation is
   environment plumbing.
 - `Match` must honour the capability it is asked about. It claims `CapIcon` on
   YouTube hosts and returns the bundled SVG from `Icon`.
+- `Match` claims `CapImageCache` only for a channel feed URL
+  (`isChannelFeedURL`), never for a page or video link. That makes the host force
+  image caching on for the feed: browse's thumbnail URLs are short-lived and
+  signed, so `poller.ingest` downloads each item's primary image into
+  `cache/youtube/` and renders the stored copy. The cache reuses an existing
+  blob for a slot, so a changed thumbnail is intentionally not refreshed on the
+  next poll.
 - Members-only videos are detected from the browse lockup's metadata badge
   (`badgeViewModel.badgeStyle == "BADGE_MEMBERS_ONLY"`, label "Members only")
   and tagged with the `members-only` category (`lockupMembersOnly`). The badge
